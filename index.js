@@ -12,6 +12,11 @@ let cardElms;
 /* GAME VARIABLES */
 let score;
 let cards = [];
+let cardTemplate = {
+  cardId: 'x',
+  coupleValue: '1 or 2',
+  imgSrc: 'images/img-x',
+};
 
 /* GAME FUNCTIONS */
 
@@ -45,11 +50,26 @@ const checkInput = function () {
   }
 };
 
+const switchCardElmsHandler = function () {
+  // first add handler for revelaing
+  cardElms[i].addEventListener('click', function () {
+    cardRotate(currentCardContent, '180deg');
+
+    // if the first event is fired, add the second handler
+    cardElms[i].addEventListener('click', function () {
+      cardRotate(currentCardContent, '0deg');
+
+      // if the second event is fired, restart function
+      switchCardElmsHandler();
+    });
+  });
+};
+
 const renderCards = function () {
   // render the selected number of cards in DOM
   for (let i = 0; i < Number(cardsSelectorInput.value); i++) {
     // give all cards a unique id
-    // give each id an img
+    // give each card an img
     cardGrid.innerHTML += `
     <div class="card" id="card-${i}">
       <div class="content">
@@ -64,24 +84,37 @@ const renderCards = function () {
   cardElms = document.querySelectorAll('.card');
 
   for (let i = 0; i < cardElms.length; i++) {
-    // create a "cards" dedicated game variables array for later use with same lenght of cardElms nodelist
+    // populate the "cards" dedicated game variables array with "card" objects
+
+    /* // create the object
+    eval(`const card${i} = Object.create(cardTemplate)`);
+    // overwrite objects template (cardTemplate) values
+    eval(`card${i}`).cardId = i;
+    eval(`card${i}`).coupleValue = Math.round(Math.random());
+ */
+    //push object into array
+
     cards[i] = `card-${i}`;
 
     // select the card content for the current generated card id
     const currentCardContent = document.querySelector(`#card-${i} .content`);
 
-    // give any card in CardElms an event handler
-    cardElms[i].addEventListener('click', function () {
-      cardReveal(currentCardContent);
-    });
+    // give any card in CardElms an event handler for revealing and hiding
+
+    // handle the assignment of listeners for revealing or hiding card
+    switchCardElmsHandler();
   }
 
   // attach to each card content a background img
 };
 
-const cardReveal = function (cardContent) {
-  cardContent.style.transform = 'rotateY(180deg)';
+const cardRotate = function (cardContent, deg) {
+  cardContent.style.transform = `rotateY(${deg})`;
 };
+
+/* const cardHide = function (cardContent) {
+  cardContent.style.transform = 'rotateY(0deg)';
+}; */
 
 btnPlay.addEventListener('click', checkInput);
 
