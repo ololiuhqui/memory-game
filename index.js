@@ -50,26 +50,10 @@ const checkInput = function () {
   }
 };
 
-const switchCardElmsHandler = function () {
-  // first add handler for revelaing
-  cardElms[i].addEventListener('click', function () {
-    cardRotate(currentCardContent, '180deg');
-
-    // if the first event is fired, add the second handler
-    cardElms[i].addEventListener('click', function () {
-      cardRotate(currentCardContent, '0deg');
-
-      // if the second event is fired, restart function
-      switchCardElmsHandler();
-    });
-  });
-};
-
 const renderCards = function () {
   // render the selected number of cards in DOM
   for (let i = 0; i < Number(cardsSelectorInput.value); i++) {
-    // give all cards a unique id
-    // give each card an img
+    // give all cards a unique id and img src
     cardGrid.innerHTML += `
     <div class="card" id="card-${i}">
       <div class="content">
@@ -83,18 +67,27 @@ const renderCards = function () {
   // select all cards in DOM
   cardElms = document.querySelectorAll('.card');
 
+  // populate cards array with card objects
   for (let i = 0; i < cardElms.length; i++) {
-    // populate the "cards" dedicated game variables array with "card" objects
+    let currentCard = {
+      cardId: i,
+      imgSrc: '',
+      coupleValue: '',
 
-    /* // create the object
-    eval(`const card${i} = Object.create(cardTemplate)`);
-    // overwrite objects template (cardTemplate) values
-    eval(`card${i}`).cardId = i;
-    eval(`card${i}`).coupleValue = Math.round(Math.random());
- */
-    //push object into array
+      CalcImgSrc: function () {
+        if (cards.includes()) {
+          Math.floor(Math.random() * cardElms.length);
+        }
+      },
 
-    cards[i] = `card-${i}`;
+      CalcCoupleValue: function () {
+        if (cards.includes()) {
+        }
+      },
+    };
+
+    // document.querySelector(`#card-${i}`);
+    cards.push(currentCard);
 
     // select the card content for the current generated card id
     const currentCardContent = document.querySelector(`#card-${i} .content`);
@@ -102,6 +95,20 @@ const renderCards = function () {
     // give any card in CardElms an event handler for revealing and hiding
 
     // handle the assignment of listeners for revealing or hiding card
+    const switchCardElmsHandler = function () {
+      // first add handler for revelaing
+      cardElms[i].addEventListener('click', function () {
+        cardRotate(currentCardContent, '180deg');
+
+        // when the first event is fired, add the second handler
+        cardElms[i].addEventListener('click', function () {
+          cardRotate(currentCardContent, '0deg');
+
+          // when the second event is fired, restart function
+          switchCardElmsHandler();
+        });
+      });
+    };
     switchCardElmsHandler();
   }
 
