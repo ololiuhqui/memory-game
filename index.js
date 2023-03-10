@@ -75,13 +75,18 @@ const renderCards = function () {
       coupleValue: '',
 
       CalcImgSrc: function () {
-        if (cards.includes()) {
+        // check for already present img sources and couple value in the cards array
+        const cardsImgSrcs = cards.map(x => x.imgSrc);
+        const cardsCoupleValues = cards.map(x => x.coupleValue);
+
+        if (cardsImgSrcs.includes(i)) {
+        } else {
           Math.floor(Math.random() * cardElms.length);
         }
       },
 
       CalcCoupleValue: function () {
-        if (cards.includes()) {
+        if (cards.includes(currentCard.coupleValue === 1)) {
         }
       },
     };
