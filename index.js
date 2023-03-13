@@ -51,38 +51,39 @@ const checkInput = function () {
 };
 
 const renderCards = function () {
-  // render the selected number of cards in DOM
   for (let i = 0; i < Number(cardsSelectorInput.value); i++) {
-    // give all cards a unique id and img src
-    cardGrid.innerHTML += `
-    <div class="card" id="card-${i}">
-      <div class="content">
-          <div class="card-front">?</div>
-          <div class="card-back">              
-            <img src="/images/img-${i}.jpg" alt="">
-          </div>
-      </div>`;
-  }
+    // GAME VARIABLES RENDERING
 
-  // select all cards in DOM
-  cardElms = document.querySelectorAll('.card');
-
-  // populate cards array with card objects
-  for (let i = 0; i < cardElms.length; i++) {
+    // populate cards array with card objects
     let currentCard = {
       cardId: i,
       imgSrc: '',
       coupleValue: '',
 
       CalcImgSrc: function () {
-        // check for already present img sources and couple value in the cards array
-        const cardsImgSrcs = cards.map(x => x.imgSrc);
-        const cardsCoupleValues = cards.map(x => x.coupleValue);
+        // check for already present img sources and couple value in the objects already in cards array
 
-        if (cardsImgSrcs.includes(i)) {
-        } else {
-          Math.floor(Math.random() * cardElms.length);
+        for (let i = 0; i < cards.length; i++) {
+          // convert desired values to an array
+          let cardsImgSrcs = card[i].imgSrc;
+
+          if (cardsImgSrcs.includes(i)) {
+            const checkIfDuplicates = function (arr) {
+              let alreadySeen = {};
+
+              arr.forEach(function (str) {
+                if (alreadySeen[str]) {
+                } else {
+                  alreadySeen[str] = true;
+                }
+              });
+            };
+          } else {
+            Math.floor(Math.random() * cards.length);
+          }
         }
+
+        const cardsCoupleValues = cards.map(x => x.coupleValue);
       },
 
       CalcCoupleValue: function () {
@@ -115,7 +116,24 @@ const renderCards = function () {
       });
     };
     switchCardElmsHandler();
+
+    // DOM ELEMENTS RENDERING
+    // render the selected number of cards in DOM
+    // give all cards a unique id and img src
+    cardGrid.innerHTML += `
+    <div class="card" id="card-${i}">
+      <div class="content">
+          <div class="card-front">?</div>
+          <div class="card-back">              
+            <img src="/images/img-${i}.jpg" alt="">
+          </div>
+      </div>`;
   }
+
+  // select all cards in DOM
+  cardElms = document.querySelectorAll('.card');
+
+  // for (let i = 0; i < cardElms.length; i++) {}
 
   // attach to each card content a background img
 };
