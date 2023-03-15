@@ -18,6 +18,9 @@ let cardTemplate = {
   imgSrc: 'images/img-x',
 };
 
+// array for all the img srcs
+let cardsImgSrcs = [];
+
 /* GAME FUNCTIONS */
 
 const init = function () {
@@ -50,6 +53,19 @@ const checkInput = function () {
   }
 };
 
+const checkIfDuplicates = function (arr) {
+  let alreadySeen = {};
+
+  arr.forEach(function (str) {
+    if (alreadySeen[str]) {
+      return true;
+    } else {
+      alreadySeen[str] = true;
+      return false;
+    }
+  });
+};
+
 const renderCards = function () {
   for (let i = 0; i < Number(cardsSelectorInput.value); i++) {
     // GAME VARIABLES RENDERING
@@ -59,25 +75,18 @@ const renderCards = function () {
       cardId: i,
       imgSrc: '',
       coupleValue: '',
+      isDuplicate: '',
 
       CalcImgSrc: function () {
         // check for already present img sources and couple value in the objects already in cards array
 
         for (let i = 0; i < cards.length; i++) {
-          // convert desired values to an array
-          let cardsImgSrcs = card[i].imgSrc;
-
           if (cardsImgSrcs.includes(i)) {
-            const checkIfDuplicates = function (arr) {
-              let alreadySeen = {};
-
-              arr.forEach(function (str) {
-                if (alreadySeen[str]) {
-                } else {
-                  alreadySeen[str] = true;
-                }
-              });
-            };
+            // check for duplicates
+            checkIfDuplicates(cardsImgSrcs);
+            if (checkIfDuplicates(cardsImgSrcs) === true) {
+              this.isDuplicate = true;
+            }
           } else {
             Math.floor(Math.random() * cards.length);
           }
