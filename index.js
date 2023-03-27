@@ -9,17 +9,23 @@ const btnStartNewGame = document.querySelector('.start-new-game');
 const cardGrid = document.querySelector('.card-grid');
 let cardElms;
 
-/* GAME VARIABLES */
+/* GAME VARIABLES AND OBJECTS PROTOTYPES*/
 let score;
 let cards = [];
-let cardTemplate = {
-  cardId: 'x',
-  coupleValue: '1 or 2',
-  imgSrc: 'images/img-x',
-};
 
-// array for all the img srcs
-let cardsImgSrcs = [];
+const cardConstructor = function (id) {
+  (this.cardId = id), (this.coupleValue = 0), (this.imgSrc = 0);
+};
+cardConstructor.prototype.defineCardProperties = function () {
+  for (let i = 0; i <= cards.length; i++) {
+    while (this.imgSrc !== cards[i].imgSrc && cards[i].coupleValue !== 2) {
+      this.imgSrc = Math.floor(
+        Math.random() * Number(cardsSelectorInput.value)
+      );
+      this.coupleValue += 1;
+    }
+  }
+};
 
 /* GAME FUNCTIONS */
 
@@ -39,7 +45,7 @@ const checkInput = function () {
   }
   // if input is not a valid number
   else if (cardsSelectorInput.value > 100) {
-    // add tooltip
+    // add different tooltip
     inputTooltip.classList.remove('hidden');
     inputTooltip.textContent = 'Insert a valid number! (between 1 and 100)';
   }
@@ -68,50 +74,32 @@ const checkIfDuplicates = function (arr) {
 
 const renderCards = function () {
   for (let i = 0; i < Number(cardsSelectorInput.value); i++) {
-    // GAME VARIABLES RENDERING
-
     // populate cards array with card objects
-    let currentCard = {
-      cardId: i,
-      imgSrc: '',
-      coupleValue: '',
-      isDuplicate: '',
-
-      CalcImgSrc: function () {
-        // check for already present img sources and couple value in the objects already in cards array
-
-        for (let i = 0; i < cards.length; i++) {
-          if (cardsImgSrcs.includes(i)) {
-            // check for duplicates
-            checkIfDuplicates(cardsImgSrcs);
-            if (checkIfDuplicates(cardsImgSrcs) === true) {
-              this.isDuplicate = true;
-            }
-          } else {
-            Math.floor(Math.random() * cards.length);
-          }
-        }
-
-        const cardsCoupleValues = cards.map(x => x.coupleValue);
-      },
-
-      CalcCoupleValue: function () {
-        if (cards.includes(currentCard.coupleValue === 1)) {
-        }
-      },
-    };
-
-    // document.querySelector(`#card-${i}`);
+    let currentCard = new cardConstructor(i);
+    currentCard.defineCardProperties();
     cards.push(currentCard);
 
-    // select the card content for the current generated card id
+    // DOM ELEMENTS RENDERING
+    // render the selected number of cards in DOM in a grid
+
+    cardGrid.innerHTML += `
+    <div class="card" id="card-${i}">
+      <div class="content">
+          <div class="card-front">?</div>
+          <div class="card-back">              
+            <img src="images/img-${cards[i].imgSrc}" alt="">
+          </div>
+      </div>`;
+
+    // select the card content for the currently generated card id
     const currentCardContent = document.querySelector(`#card-${i} .content`);
+    // select all cards in DOM
+    cardElms = document.querySelectorAll('.card');
 
-    // give any card in CardElms an event handler for revealing and hiding
+    // REVEAL/HIDE EVENTS
 
-    // handle the assignment of listeners for revealing or hiding card
     const switchCardElmsHandler = function () {
-      // first add handler for revelaing
+      // first add handler for reveling
       cardElms[i].addEventListener('click', function () {
         cardRotate(currentCardContent, '180deg');
 
@@ -125,26 +113,7 @@ const renderCards = function () {
       });
     };
     switchCardElmsHandler();
-
-    // DOM ELEMENTS RENDERING
-    // render the selected number of cards in DOM
-    // give all cards a unique id and img src
-    cardGrid.innerHTML += `
-    <div class="card" id="card-${i}">
-      <div class="content">
-          <div class="card-front">?</div>
-          <div class="card-back">              
-            <img src="/images/img-${i}.jpg" alt="">
-          </div>
-      </div>`;
   }
-
-  // select all cards in DOM
-  cardElms = document.querySelectorAll('.card');
-
-  // for (let i = 0; i < cardElms.length; i++) {}
-
-  // attach to each card content a background img
 };
 
 const cardRotate = function (cardContent, deg) {
