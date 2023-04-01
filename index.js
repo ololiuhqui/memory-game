@@ -18,12 +18,22 @@ const cardConstructor = function (id) {
 };
 cardConstructor.prototype.defineCardProperties = function () {
   for (let i = 0; i <= cards.length; i++) {
-    while (this.imgSrc !== cards[i].imgSrc && cards[i].coupleValue !== 2) {
+    this.imgSrc = Math.floor(Math.random() * Number(cardsSelectorInput.value));
+    this.coupleValue = 0;
+
+    if (this.imgSrc === cards[i].imgSrc && this.coupleValue === 0) {
+    } else if (this.imgSrc === cards[i].imgSrc && this.coupleValue === 1) {
+      this.defineCardProperties();
+    }
+
+    /* this.imgSrc = '';
+    this.coupleValue = '';
+    while (this.imgSrc === cards[i].imgSrc) {
       this.imgSrc = Math.floor(
         Math.random() * Number(cardsSelectorInput.value)
       );
       this.coupleValue += 1;
-    }
+    } */
   }
 };
 
@@ -77,6 +87,7 @@ const renderCards = function () {
     // populate cards array with card objects
     let currentCard = new cardConstructor(i);
     currentCard.defineCardProperties();
+    console.log(currentCard);
     cards.push(currentCard);
 
     // DOM ELEMENTS RENDERING
