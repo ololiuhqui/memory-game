@@ -1,75 +1,75 @@
 'use strict';
 
-/* DOM ELEMENTS */
+/*  DOM ELEMENTS */
+
 const cardsSelector = document.querySelector('.select-cards');
-const cardsSelectorInput = document.querySelector('.select-cards input');
-const btnPlay = document.querySelector('.select-cards button');
-const inputTooltip = document.querySelector('.input-container .tooltip');
+const inputBtns = document.querySelectorAll(
+  '.choose-cards-n-buttons-container button'
+);
 const btnStartNewGame = document.querySelector('.start-new-game');
 const cardGrid = document.querySelector('.card-grid');
 let cardElms;
 
-/* GAME VARIABLES AND OBJECTS PROTOTYPES*/
+/*  GAME VARIABLES AND OBJECTS PROTOTYPES*/
+
 let score;
+// create a set to ensure only unique card objects will be in the cards array
 let cards = [];
+
+/* Randomize first card (needed to make the for loop work correctly). 
+  NOTICE THAT without this hardcoding cards.length would be 0, so the loop won't even start,
+  always assigning the default values this.coupleValue = 0 and this.imgSrc = 0
+  to the first card therefore removing randomization.
+  While using i <= cards.length would throw the exeption: cards[i] is undefined */
+
+/* cards.push({
+  cardId: 0,
+  coupleValue: 0,
+  imgSrc: Math.floor(Math.random() * Number(cardsSelectorInput.value)),
+}); */
 
 const cardConstructor = function (id) {
   (this.cardId = id), (this.coupleValue = 0), (this.imgSrc = 0);
 };
-cardConstructor.prototype.defineCardProperties = function () {
-  for (let i = 0; i <= cards.length; i++) {
-    this.imgSrc = Math.floor(Math.random() * Number(cardsSelectorInput.value));
-    this.coupleValue = 0;
+cardConstructor.prototype.defineCardProperties = function (cardsNumber) {
+  /* Checking every card in the array and handling the imgSrc and coupleValue assignement to get a new random card
+  while making sure there's a couple for each card image */
 
-    if (this.imgSrc === cards[i].imgSrc && this.coupleValue === 0) {
-    } else if (this.imgSrc === cards[i].imgSrc && this.coupleValue === 1) {
-      this.defineCardProperties();
+  this.imgSrc = Math.floor((Math.random() * cardsNumber) / 2);
+  this.coupleValue = 0;
+
+  /* for (let i = 0; i < cards.length; i++) {
+    if (this.imgSrc === cards[i].imgSrc && cards[i].coupleValue === 0) {
+      this.coupleValue = 1;
     }
-
-    /* this.imgSrc = '';
-    this.coupleValue = '';
-    while (this.imgSrc === cards[i].imgSrc) {
-      this.imgSrc = Math.floor(
-        Math.random() * Number(cardsSelectorInput.value)
-      );
-      this.coupleValue += 1;
-    } */
-  }
+    while (this.imgSrc === cards[i].imgSrc && cards[i].coupleValue === 1) {
+      this.imgSrc = Math.floor((Math.random() * cardsNumber) / 2);
+    }
+  } */
 };
 
-/* GAME FUNCTIONS */
+/*  GAME FUNCTIONS */
 
 const init = function () {
+  // TODO Check for highscore in localstorage and show it
   score = 0;
   cardsSelector.classList.remove('hidden');
-  cardsSelectorInput.focus();
 };
 init();
 
-const checkInput = function () {
-  // if input is NaN
-  if (!cardsSelectorInput.value) {
-    // add tooltip
-    inputTooltip.classList.remove('hidden');
-    inputTooltip.textContent = 'Insert a number!';
-  }
-  // if input is not a valid number
-  else if (cardsSelectorInput.value > 100) {
-    // add different tooltip
-    inputTooltip.classList.remove('hidden');
-    inputTooltip.textContent = 'Insert a valid number! (between 1 and 100)';
-  }
-  // if input is a valid number
-  else if (0 < cardsSelectorInput.value && cardsSelectorInput.value <= 100) {
-    // remove card selector, rendercards and show "start new game" btn
-    cardsSelector.classList.add('hidden');
-    btnStartNewGame.classList.remove('hidden');
-
-    renderCards();
+const checkInput = function (button) {
+  if (button === 0) {
+    renderCards(10);
+  } else if (button === 1) {
+    renderCards(20);
+  } else if (button === 2) {
+    renderCards(30);
+  } else if (button === 3) {
+    renderCards(50);
   }
 };
 
-const checkIfDuplicates = function (arr) {
+/* const checkIfDuplicates = function (arr) {
   let alreadySeen = {};
 
   arr.forEach(function (str) {
@@ -81,15 +81,23 @@ const checkIfDuplicates = function (arr) {
     }
   });
 };
+ */
 
-const renderCards = function () {
-  for (let i = 0; i < Number(cardsSelectorInput.value); i++) {
-    // populate cards array with card objects
+const renderCards = function (cardsNumber) {
+  for (let i = 0; i < cardsNumber; i++) {
+    // Populate cards array with card objects from prototype
+
     let currentCard = new cardConstructor(i);
-    currentCard.defineCardProperties();
-    console.log(currentCard);
-    cards.push(currentCard);
+    currentCard.defineCardProperties(cardsNumber);
+    // Give each card an ID
+    currentCard.cardId = cards[i];
 
+    console.log(currentCard);
+
+    cards.push(currentCard);
+  }
+
+  for (let i = 0; i < cardsNumber; i++) {
     // DOM ELEMENTS RENDERING
     // render the selected number of cards in DOM in a grid
 
@@ -98,16 +106,22 @@ const renderCards = function () {
       <div class="content">
           <div class="card-front">?</div>
           <div class="card-back">              
-            <img src="images/img-${cards[i].imgSrc}" alt="">
+            <img src="images/img-${cards[i].imgSrc}.jpg" alt="">
           </div>
       </div>`;
+  }
 
-    // select the card content for the currently generated card id
-    const currentCardContent = document.querySelector(`#card-${i} .content`);
+  handleAnimation();
+};
+
+//  REVEAL/HIDE CARD ANIMATION EVENTS
+
+const handleAnimation = function () {
+  for (let i = 0; i < cards.length; i++) {
     // select all cards in DOM
-    cardElms = document.querySelectorAll('.card');
-
-    // REVEAL/HIDE EVENTS
+    const cardElms = document.querySelectorAll('.card');
+    // select the card content for every card id
+    const currentCardContent = document.querySelector(`#card-${i} .content`);
 
     const switchCardElmsHandler = function () {
       // first add handler for reveling
@@ -118,7 +132,7 @@ const renderCards = function () {
         cardElms[i].addEventListener('click', function () {
           cardRotate(currentCardContent, '0deg');
 
-          // when the second event is fired, restart function
+          // when the second event is fired, restart function (re-add first handler)
           switchCardElmsHandler();
         });
       });
@@ -131,14 +145,9 @@ const cardRotate = function (cardContent, deg) {
   cardContent.style.transform = `rotateY(${deg})`;
 };
 
-/* const cardHide = function (cardContent) {
-  cardContent.style.transform = 'rotateY(0deg)';
-}; */
-
-btnPlay.addEventListener('click', checkInput);
-
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    checkInput();
-  }
-});
+for (let i = 0; i < inputBtns.length; i++) {
+  inputBtns[i].addEventListener('click', () => {
+    checkInput(i);
+    // TODO remove the input buttons with a function and show the start new game button, add score
+  });
+}
