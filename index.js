@@ -16,36 +16,8 @@ let score;
 // create a set to ensure only unique card objects will be in the cards array
 let cards = [];
 
-/* Randomize first card (needed to make the for loop work correctly). 
-  NOTICE THAT without this hardcoding cards.length would be 0, so the loop won't even start,
-  always assigning the default values this.coupleValue = 0 and this.imgSrc = 0
-  to the first card therefore removing randomization.
-  While using i <= cards.length would throw the exeption: cards[i] is undefined */
-
-/* cards.push({
-  cardId: 0,
-  coupleValue: 0,
-  imgSrc: Math.floor(Math.random() * Number(cardsSelectorInput.value)),
-}); */
-
-const cardConstructor = function (id) {
-  (this.cardId = id), (this.coupleValue = 0), (this.imgSrc = 0);
-};
-cardConstructor.prototype.defineCardProperties = function (cardsNumber) {
-  /* Checking every card in the array and handling the imgSrc and coupleValue assignement to get a new random card
-  while making sure there's a couple for each card image */
-
-  this.imgSrc = Math.floor((Math.random() * cardsNumber) / 2);
-  this.coupleValue = 0;
-
-  /* for (let i = 0; i < cards.length; i++) {
-    if (this.imgSrc === cards[i].imgSrc && cards[i].coupleValue === 0) {
-      this.coupleValue = 1;
-    }
-    while (this.imgSrc === cards[i].imgSrc && cards[i].coupleValue === 1) {
-      this.imgSrc = Math.floor((Math.random() * cardsNumber) / 2);
-    }
-  } */
+const cardConstructor = function () {
+  this.cardId, this.coupleValue, this.imgSrc;
 };
 
 /*  GAME FUNCTIONS */
@@ -69,35 +41,28 @@ const checkInput = function (button) {
   }
 };
 
-/* const checkIfDuplicates = function (arr) {
-  let alreadySeen = {};
-
-  arr.forEach(function (str) {
-    if (alreadySeen[str]) {
-      return true;
-    } else {
-      alreadySeen[str] = true;
-      return false;
-    }
-  });
-};
- */
-
 const renderCards = function (cardsNumber) {
-  for (let i = 0; i < cardsNumber; i++) {
-    // Populate cards array with card objects from prototype
+  // We are gonna push a couple inside the cards array, so we need to iterate for half the cardsNumber to avoid duplicates
 
-    let currentCard = new cardConstructor(i);
-    currentCard.defineCardProperties(cardsNumber);
-    // Give each card an ID
-    currentCard.cardId = cards[i];
+  for (let i = 0; i < cardsNumber / 2; i++) {
+    // Create card objects from prototype and set the properties
+    let currentCard = new cardConstructor();
+    currentCard.imgSrc = i;
+    // Duplicate the currentCard
+    const couple = duplicateCard(currentCard);
+    // Push each of the 2 cards in the new couple inside the cards array
+    couple.forEach(singleCard => {
+      cards.push(singleCard);
+    });
 
-    console.log(currentCard);
-
-    cards.push(currentCard);
+    // TODO shuffle the array
   }
 
   for (let i = 0; i < cardsNumber; i++) {
+    cards.forEach(couple => {
+      couple.cardId = [i];
+    });
+
     // DOM ELEMENTS RENDERING
     // render the selected number of cards in DOM in a grid
 
@@ -112,6 +77,23 @@ const renderCards = function (cardsNumber) {
   }
 
   handleAnimation();
+};
+
+//  CREATE A COUPLE FROM A CARD
+
+const duplicateCard = function (currentCard) {
+  // Define a couple
+  let couple = [];
+
+  for (let i = 0; i < 2; i++) {
+    // Define card couple value (0 first and then 1)
+    currentCard.coupleValue = i;
+    // Push card into couple
+    couple.push(currentCard);
+    console.log(couple);
+  }
+
+  return couple;
 };
 
 //  REVEAL/HIDE CARD ANIMATION EVENTS
