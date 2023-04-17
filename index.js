@@ -59,8 +59,8 @@ const renderCards = function (cardsNumber) {
   }
 
   for (let i = 0; i < cardsNumber; i++) {
-    cards.forEach(couple => {
-      couple.cardId = [i];
+    cards.forEach(card => {
+      card.cardId = [i];
     });
 
     // DOM ELEMENTS RENDERING
