@@ -54,14 +54,12 @@ const renderCards = function (cardsNumber) {
     couple.forEach(singleCard => {
       cards.push(singleCard);
     });
-
-    // TODO shuffle the array
   }
 
+  shuffleArray(cards);
+
   for (let i = 0; i < cardsNumber; i++) {
-    cards.forEach(card => {
-      card.cardId = [i];
-    });
+    cards[i].cardId = i + 1;
 
     // DOM ELEMENTS RENDERING
     // render the selected number of cards in DOM in a grid
@@ -89,8 +87,7 @@ const duplicateCard = function (currentCard) {
     // Define card couple value (0 first and then 1)
     currentCard.coupleValue = i;
     // Push card into couple
-    couple.push(currentCard);
-    console.log(couple);
+    couple.push({ ...currentCard });
   }
 
   return couple;
@@ -133,3 +130,12 @@ for (let i = 0; i < inputBtns.length; i++) {
     // TODO remove the input buttons with a function and show the start new game button, add score
   });
 }
+
+// Shuffle array with Fisher-Yates modern shuffle
+const shuffleArray = function (a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
