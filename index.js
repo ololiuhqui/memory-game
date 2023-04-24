@@ -22,12 +22,43 @@ const cardConstructor = function () {
 
 /*  GAME FUNCTIONS */
 
+// Shuffle array with Fisher-Yates modern shuffle
+const shuffleArray = function (a) {
+  // i has to be at max = the index of the last element in array
+  // and at min = 1
+  for (let i = a.length - 1; i > 0; i--) {
+    // Create a random number integer j such that 0 ≤ j ≤ i
+    const j = Math.floor(Math.random() * (i + 1));
+    // Swap the element at position i with the element at position j (random)
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+// Rotate a card
+const cardRotate = function (cardContent, deg) {
+  cardContent.style.transform = `rotateY(${deg})`;
+};
+
+// Hide / Show the menù
+const toggleCardsSelector = function (toggle) {
+  if (toggle === 'on') {
+    cardsSelector.classList.remove('hidden');
+  } else if (toggle === 'off') {
+    cardsSelector.classList.add('hidden');
+  }
+};
+
+// INITIALIZE THE GAME
+
 const init = function () {
   // TODO Check for highscore in localstorage and show it
   score = 0;
-  cardsSelector.classList.remove('hidden');
+  toggleCardsSelector('on');
 };
 init();
+
+// CHECKING INPUT
 
 const checkInput = function (button) {
   if (button === 0) {
@@ -40,6 +71,8 @@ const checkInput = function (button) {
     renderCards(50);
   }
 };
+
+// RENDERING CARDS
 
 const renderCards = function (cardsNumber) {
   // We are gonna push a couple inside the cards array, so we need to iterate for half the cardsNumber to avoid duplicates
@@ -61,7 +94,7 @@ const renderCards = function (cardsNumber) {
   for (let i = 0; i < cardsNumber; i++) {
     cards[i].cardId = i + 1;
 
-    // DOM ELEMENTS RENDERING
+    // Rendering cards in DOM
     // render the selected number of cards in DOM in a grid
 
     cardGrid.innerHTML += `
@@ -74,10 +107,10 @@ const renderCards = function (cardsNumber) {
       </div>`;
   }
 
-  handleAnimation();
+  handleRotation();
 };
 
-//  CREATE A COUPLE FROM A CARD
+//  Create a couple from a card
 
 const duplicateCard = function (currentCard) {
   // Define a couple
@@ -93,16 +126,40 @@ const duplicateCard = function (currentCard) {
   return couple;
 };
 
-//  REVEAL/HIDE CARD ANIMATION EVENTS
+// PLAYER ROUND
 
-const handleAnimation = function () {
+document.addEventListener('click', function (e) {
+  console.log(e.target);
+});
+
+/*checkSelection(){
+
+ };
+
+if (card1 === card2) {
+  validateCouple(card1, card2);
+} else {
+  cardRotate(card1, '0deg');
+  cardRotate(card2, '0deg');
+}
+
+const validateCouple = function (card1, card2) {
+  card1.style = yellow;
+  card2.style = yellow;
+}; */
+
+/* HANDLERS */
+
+//  Cards rotation handlers
+
+const handleRotation = function () {
   for (let i = 0; i < cards.length; i++) {
     // select all cards in DOM
     const cardElms = document.querySelectorAll('.card');
-    // select the card content for every card id
+    // select the card content for every card HTML id
     const currentCardContent = document.querySelector(`#card-${i} .content`);
 
-    const switchCardElmsHandler = function () {
+    const addHandlers = function () {
       // first add handler for reveling
       cardElms[i].addEventListener('click', function () {
         cardRotate(currentCardContent, '180deg');
@@ -112,30 +169,18 @@ const handleAnimation = function () {
           cardRotate(currentCardContent, '0deg');
 
           // when the second event is fired, restart function (re-add first handler)
-          switchCardElmsHandler();
+          addHandlers();
         });
       });
     };
-    switchCardElmsHandler();
+    addHandlers();
   }
-};
-
-const cardRotate = function (cardContent, deg) {
-  cardContent.style.transform = `rotateY(${deg})`;
 };
 
 for (let i = 0; i < inputBtns.length; i++) {
   inputBtns[i].addEventListener('click', () => {
     checkInput(i);
-    // TODO remove the input buttons with a function and show the start new game button, add score
+    // Remove the cards selector
+    toggleCardsSelector('off');
   });
 }
-
-// Shuffle array with Fisher-Yates modern shuffle
-const shuffleArray = function (a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
