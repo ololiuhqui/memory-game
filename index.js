@@ -88,20 +88,20 @@ const renderCards = function (cardsNumber) {
     // add ID to card object
     cards[i].cardId = i + 1;
 
-    // Rendering cards in DOM
-    // render the selected number of cards in DOM in a grid
-
-    cardGrid.innerHTML += `
+    cards[i].domRef = document.createElement(`
     <div class="card" id="card-${i}">
       <div class="content">
           <div class="card-front">?</div>
           <div class="card-back">              
             <img src="images/img-${cards[i].imgSrc}.jpg" alt="">
           </div>
-      </div>`;
+      </div>`);
+    // Rendering cards in DOM
+    // render the selected number of cards in DOM in a grid
 
-    // add DOM reference to card object
-    cards[i].domRef = document.getElementById(`card-${i}`);
+    cardGrid.innerHTML +=
+      // add DOM reference to card object
+      cards[i].domRef = document.getElementById(`card-${i}`);
   }
 
   handleRotation();
@@ -126,6 +126,14 @@ const duplicateCard = function (currentCard) {
 // FIXME
 
 // PLAYER ROUND
+
+/* 
+1. find a way to connect the DOM element to the object card 
+  a. set the card object as a prototype of the DOM object
+  
+2. check if card is covered or uncovered
+3. lock uncovered card till the end of the round
+*/
 
 document.addEventListener('click', function (e) {
   let selectedCardElm = e.target.parentNode.parentNode;
