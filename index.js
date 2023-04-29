@@ -15,7 +15,7 @@ let cardElms;
 let score;
 let cards = [];
 
-const cardConstructor = function () {
+const CardConstructor = function () {
   this.cardId, this.coupleValue, this.imgSrc, this.state, this.domRef;
 };
 
@@ -71,7 +71,7 @@ const renderCards = function (cardsNumber) {
 
   for (let i = 0; i < cardsNumber / 2; i++) {
     // Create card objects from prototype and set the properties
-    let currentCard = new cardConstructor();
+    let currentCard = new CardConstructor();
     currentCard.imgSrc = i;
     currentCard.state = 'covered';
     // Duplicate the currentCard
@@ -85,26 +85,31 @@ const renderCards = function (cardsNumber) {
   shuffleArray(cards);
 
   for (let i = 0; i < cardsNumber; i++) {
-    // add ID to card object
+    // define ID of card object
     cards[i].cardId = i + 1;
 
-    cards[i].domRef = document.createElement(`
+    // This will be Prototype of card object and also a property of it
+
+    const cardDomElm = `
     <div class="card" id="card-${i}">
       <div class="content">
           <div class="card-front">?</div>
           <div class="card-back">              
             <img src="images/img-${cards[i].imgSrc}.jpg" alt="">
           </div>
-      </div>`);
-    // Rendering cards in DOM
-    // render the selected number of cards in DOM in a grid
+      </div>`;
 
-    cardGrid.innerHTML +=
-      // add DOM reference to card object
-      cards[i].domRef = document.getElementById(`card-${i}`);
+    // Render the selected number of cards in DOM in a grid
+    const RenderDomElm = function () {
+      cardGrid.innerHTML += cardDomElm;
+    };
+    RenderDomElm();
+
+    const cardDomeElmRendered = document.querySelector(`#card-${i}`);
+
+    // add DOM reference to card object
+    cards[i].domRef = cardDomeElmRendered.id;
   }
-
-  handleRotation();
 };
 
 //  Create a couple from a card
@@ -129,93 +134,56 @@ const duplicateCard = function (currentCard) {
 
 /* 
 1. find a way to connect the DOM element to the object card 
-  a. set the card object as a prototype of the DOM object
+  a. add a domRef
+  b. check if domRef is equal to the referenced (clicked) card id
   
-2. check if card is covered or uncovered
-3. lock uncovered card till the end of the round
+2. lock uncovered card till the end of the round
+  a. change the handling of rotation by inserting everything into the same object
+  b. make the object itself find the cardContent on which to apply the rotation
+
+3. Handle the turn
+  a. check if card is covered or uncovered
 */
 
 document.addEventListener('click', function (e) {
+  // get the DOM node
   let selectedCardElm = e.target.parentNode.parentNode;
 
-  if (selectedCardElm) {
-    console.log(selectedCardElm);
-  }
+  cards.forEach(card => {
+    // Check if the domRef stored into the object equals the node id
+    if (card.domRef === selectedCardElm.id && card.state === 'covered') {
+      // uncover the card
+      handleRotation.uncoverCard(card);
+    }
+  });
 });
 
-/*checkSelection(){
+const handleRotation = {
+  // Get the card content (the element on which to apply the rotation)
+  getCardContent: function (card) {
+    this.cardContent = document.querySelector(`#${card.domRef} .content`);
+  },
 
- };
+  cardContent: '',
 
-if (card1 === card2) {
-  validateCouple(card1, card2);
-} else {
-  cardRotate(card1, '0deg');
-  cardRotate(card2, '0deg');
-}
+  // Rotate a card
+  cardRotate: function (cardContent, deg) {
+    cardContent.style.transform = `rotateY(${deg})`;
+  },
 
-const validateCouple = function (card1, card2) {
-  card1.style = yellow;
-  card2.style = yellow;
-}; */
+  // Reveal a card
+  uncoverCard: function (card) {
+    card.state = 'uncovered';
+    this.getCardContent(card);
+    this.cardRotate(this.cardContent, '180deg');
+  },
 
-/* ANIMATIONS AND HANDLERS */
-
-//  Cards rotation handlers
-
-const handleRotation = function () {
-  for (let i = 0; i < cards.length; i++) {
-    // select all cards in DOM
-    const cardElms = document.querySelectorAll('.card');
-    // select the card content for every card HTML id
-    const currentCard = cards[i];
-    const currentCardContent = document.querySelector(`#card-${i} .content`);
-
-    const addHandlers = function () {
-      // first add handler for revealing
-      cardElms[i].addEventListener('click', function () {
-        uncoverCard(currentCard, currentCardContent);
-
-        // when the first event is fired, add the second handler
-        cardElms[i].addEventListener('click', function () {
-          coverCard(currentCard, currentCardContent);
-
-          // when the second event is fired, restart function (re-add first handler)
-          addHandlers();
-        });
-      });
-    };
-    addHandlers();
-  }
-};
-
-// Remove rotation event handlers
-const removeHandlers = function (cardContent) {
-  cardContent.removeEventListener('click', cardRotate(cardContent, '180deg'));
-  cardContent.removeEventListener('click', cardRotate(cardContent, '0deg'));
-};
-
-// Rotate a card
-const cardRotate = function (cardContent, deg) {
-  cardContent.style.transform = `rotateY(${deg})`;
-};
-
-// Reveal a card
-const uncoverCard = function (card, cardContent) {
-  card.state = 'uncovered';
-  cardRotate(cardContent, '180deg');
-};
-
-// Hide a card
-const coverCard = function (card, cardContent) {
-  card.state = 'covered';
-  cardRotate(cardContent, '0deg');
-};
-
-// Lock a card rotation
-const lockCardRotation = function (cardContent) {
-  removeHandlers(cardContent);
-  cardRotate(cardContent, '180deg');
+  // Hide a card
+  coverCard: function (card) {
+    card.state = 'covered';
+    this.getCardContent(card);
+    this.cardRotate(this.cardContent, '0deg');
+  },
 };
 
 // Add handlers to menù buttons
