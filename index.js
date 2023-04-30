@@ -128,9 +128,22 @@ const duplicateCard = function (currentCard) {
   return couple;
 };
 
+// BUG you can't click the same cards for comparison more than one time
+// when two cards are found equal, the comparison process stops
+
 // FIXME
 
 // PLAYER ROUND
+
+function compareCards(cards) {
+  if (cards[0].imgSrc === cards[1].imgSrc && cards[0].id !== cards[1].id) {
+    cards.splice(0, 2);
+  } else if (cards[0].imgSrc !== cards[1].imgSrc) {
+    handleRotation.coverCard(cards[0]);
+    handleRotation.coverCard(cards[1]);
+    cards.splice(0, 2);
+  }
+}
 
 /* 
 1. find a way to connect the DOM element to the object card 
@@ -145,15 +158,28 @@ const duplicateCard = function (currentCard) {
   a. check if card is covered or uncovered
 */
 
+// Create an array that will contain the cards to check equality for
+const cardsToCompare = [];
+
 document.addEventListener('click', function (e) {
   // get the DOM node
   let selectedCardElm = e.target.parentNode.parentNode;
 
   cards.forEach(card => {
-    // Check if the domRef stored into the object equals the node id
+    // Check if the domRef stored into the object equals the node id and if card is covered
     if (card.domRef === selectedCardElm.id && card.state === 'covered') {
       // uncover the card
       handleRotation.uncoverCard(card);
+
+      // Push a copy of selected card (object) into an array in order to be compared
+
+      cardsToCompare.push({ ...card });
+
+      if (cardsToCompare.length === 2) {
+        setTimeout(function () {
+          compareCards(cardsToCompare);
+        }, 1000);
+      }
     }
   });
 });
