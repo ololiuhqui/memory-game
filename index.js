@@ -1,5 +1,7 @@
 'use strict';
 
+/* **************************MENU************************************ */
+
 /*  DOM ELEMENTS */
 
 const cardsSelector = document.querySelector('.select-cards');
@@ -7,30 +9,18 @@ const inputBtns = document.querySelectorAll(
   '.choose-cards-n-buttons-container button'
 );
 const btnStartNewGame = document.querySelector('.start-new-game');
-const cardGrid = document.querySelector('.card-grid');
-let cardElms;
+const scoreSection = document.querySelector('.score-section');
+const currentScoreElm = document.querySelector('.current-score');
+const highestScoreElm = document.querySelector('.highest-score');
+const timerElm = document.querySelector('.timer');
 
-/*  GAME VARIABLES AND OBJECTS PROTOTYPES*/
+/*  VARIABLES AND OBJECTS PROTOTYPES */
 
-let score;
-let cards = [];
+let currentScore;
+let highestScore;
+let time;
 
-const CardConstructor = function () {
-  this.cardId, this.coupleValue, this.imgSrc, this.state, this.domRef;
-};
-
-/*  GAME FUNCTIONS */
-
-// Shuffle array with Fisher-Yates modern shuffle
-const shuffleArray = function (a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    // Create a random number integer j such that 0 ≤ j ≤ i
-    const j = Math.floor(Math.random() * (i + 1));
-    // Swap the element at position i with the element at position j (random)
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
+/* FUNCTIONS */
 
 // Hide / Show the menù
 const toggleCardsSelector = function (toggle) {
@@ -41,18 +31,40 @@ const toggleCardsSelector = function (toggle) {
   }
 };
 
-// INITIALIZE THE GAME
-
-const init = function () {
-  // TODO Check for highscore in localstorage and show it
-  score = 0;
-  toggleCardsSelector('on');
+// Hide / Show the score section
+const toggleScoreSection = function (toggle) {
+  if (toggle === 'on') {
+    scoreSection.classList.remove('hidden');
+  } else if (toggle === 'off') {
+    scoreSection.classList.add('hidden');
+  }
 };
-init();
 
-// CHECKING PLAYER MENU INPUT
+// Handle the timer
+let seconds = 0;
+let minutes = 0;
 
+const startTimer = function () {
+  if (seconds < 60) {
+    seconds += 1;
+    time += 1;
+  } else if (seconds === 60) {
+    seconds = 0;
+    minutes += 1;
+  }
+
+  timerElm.innerHTML = `
+  <div class="minutes">${minutes} min </div>
+  
+  <div class="seconds">${seconds} sec</div>
+  `;
+
+  setTimeout(() => startTimer(), 1000);
+};
+
+// Check the user selection (menu)
 const checkInput = function (button) {
+  toggleScoreSection('on');
   if (button === 0) {
     renderCards(10);
   } else if (button === 1) {
@@ -62,6 +74,52 @@ const checkInput = function (button) {
   } else if (button === 3) {
     renderCards(50);
   }
+};
+
+// INITIALIZE THE GAME
+
+const init = function () {
+  // TODO Check for highscore in localstorage and show it
+  currentScore = 0;
+  toggleCardsSelector('on');
+};
+init();
+
+// CHECKING PLAYER MENU INPUT
+
+// Add handlers to menù buttons
+for (let i = 0; i < inputBtns.length; i++) {
+  inputBtns[i].addEventListener('click', () => {
+    checkInput(i);
+    // Remove the cards selector
+    toggleCardsSelector('off');
+    startTimer();
+  });
+}
+
+/* **************************CARDS************************************ */
+
+/* DOM ELEMENTS */
+const cardGrid = document.querySelector('.card-grid');
+
+/* VARIABLES AND OBJECT CONSTRUCTORS */
+
+let cards = [];
+const CardConstructor = function () {
+  this.cardId, this.coupleValue, this.imgSrc, this.state, this.domRef;
+};
+
+/* FUNCTIONS */
+
+// Shuffle array with Fisher-Yates modern shuffle
+const shuffleArray = function (a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    // Create a random number integer j such that 0 ≤ j ≤ i
+    const j = Math.floor(Math.random() * (i + 1));
+    // Swap the element at position i with the element at position j (random)
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 };
 
 // RENDERING CARDS
@@ -128,19 +186,22 @@ const duplicateCard = function (currentCard) {
   return couple;
 };
 
-// BUG you can't click the same cards for comparison more than one time
-// when two cards are found equal, the comparison process stops
-
-// FIXME
-
-// PLAYER ROUND
+/* **************************PLAYER ROUND************************************ */
 
 function compareCards(cards) {
-  if (cards[0].imgSrc === cards[1].imgSrc && cards[0].id !== cards[1].id) {
+  if (
+    cards[0].imgSrc === cards[1].imgSrc &&
+    cards[0].cardId !== cards[1].cardId
+  ) {
+    score += 100;
+    handleAnimation.validateCard(cards[0]);
+    handleAnimation.validateCard(cards[1]);
     cards.splice(0, 2);
+
+    //TODO validate cards
   } else if (cards[0].imgSrc !== cards[1].imgSrc) {
-    handleRotation.coverCard(cards[0]);
-    handleRotation.coverCard(cards[1]);
+    handleAnimation.coverCard(cards[0]);
+    handleAnimation.coverCard(cards[1]);
     cards.splice(0, 2);
   }
 }
@@ -156,6 +217,11 @@ function compareCards(cards) {
 
 3. Handle the turn
   a. check if card is covered or uncovered
+
+4. Validate the card
+  a. update score
+  b. change card border
+  c. add animation / sound?  
 */
 
 // Create an array that will contain the cards to check equality for
@@ -169,11 +235,11 @@ document.addEventListener('click', function (e) {
     // Check if the domRef stored into the object equals the node id and if card is covered
     if (card.domRef === selectedCardElm.id && card.state === 'covered') {
       // uncover the card
-      handleRotation.uncoverCard(card);
+      handleAnimation.uncoverCard(card);
 
       // Push a copy of selected card (object) into an array in order to be compared
 
-      cardsToCompare.push({ ...card });
+      cardsToCompare.push(card);
 
       if (cardsToCompare.length === 2) {
         setTimeout(function () {
@@ -184,8 +250,10 @@ document.addEventListener('click', function (e) {
   });
 });
 
-const handleRotation = {
-  // Get the card content (the element on which to apply the rotation)
+/* **************************ANIMATIONS************************************ */
+
+const handleAnimation = {
+  // Get the card content DOM elm (the element on which to apply the rotation)
   getCardContent: function (card) {
     this.cardContent = document.querySelector(`#${card.domRef} .content`);
   },
@@ -210,13 +278,11 @@ const handleRotation = {
     this.getCardContent(card);
     this.cardRotate(this.cardContent, '0deg');
   },
-};
 
-// Add handlers to menù buttons
-for (let i = 0; i < inputBtns.length; i++) {
-  inputBtns[i].addEventListener('click', () => {
-    checkInput(i);
-    // Remove the cards selector
-    toggleCardsSelector('off');
-  });
-}
+  // Validate a card
+  validateCard: function (card) {
+    card.state = 'validated';
+    this.getCardContent(card);
+    this.cardContent.children[1].style.borderColor = '#DAA53B';
+  },
+};
