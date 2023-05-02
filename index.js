@@ -8,13 +8,12 @@ const cardsSelector = document.querySelector('.select-cards');
 const inputBtns = document.querySelectorAll(
   '.choose-cards-n-buttons-container button'
 );
-const btnStartNewGame = document.querySelector('.start-new-game');
 const scoreSection = document.querySelector('.score-section');
 const currentScoreElm = document.querySelector('.current-score');
 const highestScoreElm = document.querySelector('.highest-score');
 const timerElm = document.querySelector('.timer');
 
-/*  VARIABLES AND OBJECTS PROTOTYPES */
+/*  VARIABLES  */
 
 let currentScore;
 let highestScore;
@@ -40,28 +39,30 @@ const toggleScoreSection = function (toggle) {
   }
 };
 
-// Handle the timer
-let seconds = 0;
+/* TODO timer
 let minutes = 0;
+let seconds = 0;
 
-const startTimer = function () {
+const timerCount = function () {
   if (seconds < 60) {
     seconds += 1;
-    time += 1;
   } else if (seconds === 60) {
     seconds = 0;
     minutes += 1;
   }
 
+  renderTime(minutes, seconds);
+};
+
+// renders time in DOM
+const renderTime = function (minutes, seconds) {
   timerElm.innerHTML = `
   <div class="minutes">${minutes} min </div>
   
   <div class="seconds">${seconds} sec</div>
   `;
-
-  setTimeout(() => startTimer(), 1000);
 };
-
+ */
 // Check the user selection (menu)
 const checkInput = function (button) {
   toggleScoreSection('on');
@@ -76,12 +77,34 @@ const checkInput = function (button) {
   }
 };
 
-// INITIALIZE THE GAME
+const updateScore = function () {
+  currentScore += 100;
+
+  // score calcolando con l'ipotetico timer
+  // currentScore += Math.floor(100 - minutes * 3 + cards.length * 10);
+
+  currentScoreElm.textContent = currentScore;
+};
+
+/* **************************INITIALIZE THE GAME************************************ */
+
+/* DOM ELEMENTS */
+
+const cardGrid = document.querySelector('.card-grid');
+
+/* FUNCTIONS */
+
+// Reset the cards in DOM
+function resetCards() {
+  cardGrid.innerHTML = '';
+}
 
 const init = function () {
   // TODO Check for highscore in localstorage and show it
   currentScore = 0;
   toggleCardsSelector('on');
+  toggleScoreSection('off');
+  resetCards();
 };
 init();
 
@@ -93,18 +116,15 @@ for (let i = 0; i < inputBtns.length; i++) {
     checkInput(i);
     // Remove the cards selector
     toggleCardsSelector('off');
-    startTimer();
   });
 }
 
-/* **************************CARDS************************************ */
-
-/* DOM ELEMENTS */
-const cardGrid = document.querySelector('.card-grid');
+/* **************************RENDERING CARDS************************************ */
 
 /* VARIABLES AND OBJECT CONSTRUCTORS */
 
 let cards = [];
+
 const CardConstructor = function () {
   this.cardId, this.coupleValue, this.imgSrc, this.state, this.domRef;
 };
@@ -120,6 +140,22 @@ const shuffleArray = function (a) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+};
+
+//  Create a couple from a card
+
+const duplicateCard = function (currentCard) {
+  // Define a couple
+  let couple = [];
+
+  for (let i = 0; i < 2; i++) {
+    // Define card couple value (0 first and then 1)
+    currentCard.coupleValue = i;
+    // Push a copy of currentCard into couple
+    couple.push({ ...currentCard });
+  }
+
+  return couple;
 };
 
 // RENDERING CARDS
@@ -146,8 +182,6 @@ const renderCards = function (cardsNumber) {
     // define ID of card object
     cards[i].cardId = i + 1;
 
-    // This will be Prototype of card object and also a property of it
-
     const cardDomElm = `
     <div class="card" id="card-${i}">
       <div class="content">
@@ -163,27 +197,9 @@ const renderCards = function (cardsNumber) {
     };
     RenderDomElm();
 
-    const cardDomeElmRendered = document.querySelector(`#card-${i}`);
-
-    // add DOM reference to card object
-    cards[i].domRef = cardDomeElmRendered.id;
+    // add DOM reference to card object (notice the .id)
+    cards[i].domRef = document.querySelector(`#card-${i}`).id;
   }
-};
-
-//  Create a couple from a card
-
-const duplicateCard = function (currentCard) {
-  // Define a couple
-  let couple = [];
-
-  for (let i = 0; i < 2; i++) {
-    // Define card couple value (0 first and then 1)
-    currentCard.coupleValue = i;
-    // Push a copy of currentCard into couple
-    couple.push({ ...currentCard });
-  }
-
-  return couple;
 };
 
 /* **************************PLAYER ROUND************************************ */
@@ -193,36 +209,17 @@ function compareCards(cards) {
     cards[0].imgSrc === cards[1].imgSrc &&
     cards[0].cardId !== cards[1].cardId
   ) {
-    score += 100;
     handleAnimation.validateCard(cards[0]);
     handleAnimation.validateCard(cards[1]);
     cards.splice(0, 2);
-
-    //TODO validate cards
+    updateScore();
+    checkForEndGame();
   } else if (cards[0].imgSrc !== cards[1].imgSrc) {
     handleAnimation.coverCard(cards[0]);
     handleAnimation.coverCard(cards[1]);
     cards.splice(0, 2);
   }
 }
-
-/* 
-1. find a way to connect the DOM element to the object card 
-  a. add a domRef
-  b. check if domRef is equal to the referenced (clicked) card id
-  
-2. lock uncovered card till the end of the round
-  a. change the handling of rotation by inserting everything into the same object
-  b. make the object itself find the cardContent on which to apply the rotation
-
-3. Handle the turn
-  a. check if card is covered or uncovered
-
-4. Validate the card
-  a. update score
-  b. change card border
-  c. add animation / sound?  
-*/
 
 // Create an array that will contain the cards to check equality for
 const cardsToCompare = [];
@@ -244,10 +241,48 @@ document.addEventListener('click', function (e) {
       if (cardsToCompare.length === 2) {
         setTimeout(function () {
           compareCards(cardsToCompare);
-        }, 1000);
+        }, 500);
       }
     }
   });
+});
+
+/* **************************END GAME************************************ */
+
+/* DOM ELEMENTS */
+const endGameScreen = document.querySelector('.endgame-screen');
+const btnStartNewGame = document.querySelector('.start-new-game');
+const endGameScoreElm = document.querySelector('.modal h3');
+
+/* FUNCTIONS */
+
+const toggleEndScreen = function () {
+  endGameScreen.classList.toggle('hidden');
+};
+
+const displayEndScore = function () {
+  endGameScoreElm.textContent += ` ${currentScore} points!`;
+};
+
+// check if cards are all validated and end game
+const checkForEndGame = function () {
+  let count = 0;
+
+  for (let i = 0; i < cards.length; i++) {
+    if (cards[i].state === 'validated') count += 1;
+  }
+
+  if (count === cards.length) {
+    toggleEndScreen();
+    displayEndScore();
+  }
+};
+
+// PLAY AGAIN
+
+btnStartNewGame.addEventListener('click', function () {
+  toggleEndScreen();
+  init();
 });
 
 /* **************************ANIMATIONS************************************ */

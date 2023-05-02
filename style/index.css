@@ -166,3 +166,54 @@ main {
   grid-auto-flow: row;
   grid-auto-rows: minmax(8rem, 1fr);
 }
+
+/* MODAL */
+
+.modal-overlay {
+  position: fixed;
+  background-color: black;
+  opacity: 40%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 1;
+}
+
+.modal {
+  position: absolute;
+  opacity: 100%;
+  background-color: #fffffb;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  row-gap: 2rem;
+  animation-name: fadein;
+  animation-duration: 1s;
+}
+
+@media only screen and (max-width: 450px) {
+  .modal {
+    height: 100%;
+    animation: none;
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 20%;
+    top: -100%;
+  }
+  to {
+    opacity: 100%;
+    top: 0;
+  }
+}
