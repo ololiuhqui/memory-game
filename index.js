@@ -40,6 +40,8 @@ const toggleScoreSection = function (toggle) {
 };
 
 /* TODO timer
+
+
 let minutes = 0;
 let seconds = 0;
 
@@ -91,12 +93,14 @@ const updateScore = function () {
 /* DOM ELEMENTS */
 
 const cardGrid = document.querySelector('.card-grid');
+let cards = [];
 
 /* FUNCTIONS */
 
 // Reset the cards in DOM
 function resetCards() {
   cardGrid.innerHTML = '';
+  cards = [];
 }
 
 const init = function () {
@@ -122,8 +126,6 @@ for (let i = 0; i < inputBtns.length; i++) {
 /* **************************RENDERING CARDS************************************ */
 
 /* VARIABLES AND OBJECT CONSTRUCTORS */
-
-let cards = [];
 
 const CardConstructor = function () {
   this.cardId, this.coupleValue, this.imgSrc, this.state, this.domRef;

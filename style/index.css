@@ -183,13 +183,14 @@ main {
 }
 
 .modal {
-  position: absolute;
+  position: fixed;
   opacity: 100%;
   background-color: #fffffb;
   z-index: 2;
   top: 0;
   left: 0;
   right: 0;
+  min-height: 300px;
   height: 50vh;
   display: flex;
   justify-content: center;
