@@ -79,15 +79,6 @@ const checkInput = function (button) {
   }
 };
 
-const updateScore = function () {
-  currentScore += 100;
-
-  // score calcolando con l'ipotetico timer
-  // currentScore += Math.floor(100 - minutes * 3 + cards.length * 10);
-
-  currentScoreElm.textContent = currentScore;
-};
-
 /* **************************INITIALIZE THE GAME************************************ */
 
 /* DOM ELEMENTS */
@@ -97,6 +88,21 @@ let cards = [];
 
 /* FUNCTIONS */
 
+// update/reset the score
+const updateScore = function (score) {
+  if (score === 0) {
+    currentScore = 0;
+  } else {
+    currentScore += score;
+  }
+
+  // score calcolando con l'ipotetico timer
+  // currentScore += Math.floor(100 - minutes * 3 + cards.length * 10);
+
+  currentScoreElm.textContent = currentScore;
+  return currentScore;
+};
+
 // Reset the cards in DOM
 function resetCards() {
   cardGrid.innerHTML = '';
@@ -105,7 +111,7 @@ function resetCards() {
 
 const init = function () {
   // TODO Check for highscore in localstorage and show it
-  currentScore = 0;
+  updateScore(0);
   toggleCardsSelector('on');
   toggleScoreSection('off');
   resetCards();
@@ -214,7 +220,7 @@ function compareCards(cards) {
     handleAnimation.validateCard(cards[0]);
     handleAnimation.validateCard(cards[1]);
     cards.splice(0, 2);
-    updateScore();
+    updateScore(100);
     checkForEndGame();
   } else if (cards[0].imgSrc !== cards[1].imgSrc) {
     handleAnimation.coverCard(cards[0]);
