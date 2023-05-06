@@ -269,7 +269,7 @@ const toggleEndScreen = function () {
 };
 
 const displayEndScore = function () {
-  endGameScoreElm.textContent += ` ${currentScore} points!`;
+  endGameScoreElm.textContent = ` ${currentScore} points!`;
 };
 
 // check if cards are all validated and end game
